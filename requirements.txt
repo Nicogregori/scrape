@@ -9,3 +9,7 @@ black
 yapf
 python-gitlab
 twine
+bs4
+beautifulsoup4
+beautifulsoup4
+BeautifulSoup
