@@ -1,0 +1,3 @@
+graft scrape
+global-exclude *.py[cod] __pycache__ *.so *.ipynb
+recursive-exclude  scrape/jupy *
