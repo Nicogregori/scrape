@@ -130,7 +130,7 @@ def check():
                  value = track.text,
                   inplace = True)
           print(dataframe)
-          dataframe.to_csv('outfile.csv', header=None, index = False)
+          dataframe.to_csv('scrape/data/outfile.csv', header=None, index = False)
 
 
     # with open('scrape/data/Scrape.csv', 'r') as read_obj, open('scrape/data/Scrape.csv', 'w') as outfile:
