@@ -132,7 +132,6 @@ def check():
           print(dataframe)
           dataframe.to_csv('outfile.csv', header=None, index = False)
 
-    # test
     # with open('scrape/data/Scrape.csv', 'r') as read_obj, open('scrape/data/Scrape.csv', 'w') as outfile:
     #     csv_reader = reader(read_obj,delimiter=',')
     #     writer =  csv.writer(outfile)
