@@ -13,6 +13,7 @@ import pandas as pd
 import numpy as np
 import csv
 from csv import reader
+import os
 
 # schedule.every(10).minutes.do(job)
 # schedule.every().hour.do(job)
@@ -20,6 +21,7 @@ from csv import reader
 # schedule.every(5).to(10).minutes.do(job)
 # schedule.every().monday.do(job)
 # schedule.every().wednesday.at("13:15").do(job)
+
 
 artist_names = []
 
@@ -126,11 +128,18 @@ def check():
           driver.get(f"https://soundcloud.com/{artist_link}/tracks")
           track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
           if track.text != rows[1]:
+              title = f"New track by {rows[0]}"
+              message = track.text
+              command = f'''
+              osascript -e 'display notification "{message}" with title "{title}"'
+              '''
+              os.system(command)
+              #print(f"{rows[0]} just uploaded {track.text}")
               dataframe.replace(to_replace =rows[1],
                  value = track.text,
                   inplace = True)
-          print(dataframe)
-          dataframe.to_csv('outfile.csv', header=None, index = False)
+          dataframe.to_csv('scrape/data/Scrape.csv', header=None, index = False)
+    driver.close()
 
     # with open('scrape/data/Scrape.csv', 'r') as read_obj, open('scrape/data/Scrape.csv', 'w') as outfile:
     #     csv_reader = reader(read_obj,delimiter=',')
@@ -143,7 +152,7 @@ def check():
     #           row[0] = 0
     #           writer.writerow(row)
 
-check()
+#check()
 
         # for row in csv_reader:
         #   artist_link = row[0].replace(" ","-")
@@ -168,8 +177,8 @@ check()
 
 
 
-#schedule.every().minute.at(":17").do(scraper)
+schedule.every().minute.at(":15").do(check)
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
