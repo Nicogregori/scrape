@@ -14,14 +14,36 @@ import numpy as np
 import csv
 from csv import reader
 import os
+import psycopg2
 
-# schedule.every(10).minutes.do(job)
-# schedule.every().hour.do(job)
-# schedule.every().day.at("10:30").do(job)
-# schedule.every(5).to(10).minutes.do(job)
-# schedule.every().monday.do(job)
-# schedule.every().wednesday.at("13:15").do(job)
+profile = True
 
+create = input("Want to create a profile (y/n)?: ")
+if create.lower() == "y":
+  profile = True
+elif create.lower() == "yes":
+  profile = True
+elif create.lower() == "ja":
+  profile = True
+else:
+  profile = False
+
+while profile == True:
+  user_name = input("Type name: ")
+  user_surname = input("Type surname: ")
+  user_username = input("Type username: ")
+  user_mail = input("Type e-mail: ")
+  user_password = input("Type password: ")
+
+  conn = psycopg2.connect(database="Scrape", user = "postgres", password="lennynico2011",host="localhost",port="5432")
+  cur = conn.cursor()
+  cur.execute("INSERT INTO profile VALUES (%s, %s, %s, %s, %s)", (user_name,user_surname,user_username,user_mail,user_password))
+  cur.execute("SELECT * FROM profile;")
+  print(cur.fetchall())
+  conn.commit()
+  cur.close()
+  conn.close()
+  profile = False
 
 artist_names = []
 
@@ -52,11 +74,6 @@ while flag == True:
       flag = True
     else:
       flag = False
-
-# myFile = open('scrape/data/Artists.csv', 'a')
-# with myFile:
-#    writer = csv.writer(myFile)
-#    writer.writerows(artist_names)
 
 
 def get_link(link_name):
@@ -128,8 +145,8 @@ def check():
           driver.get(f"https://soundcloud.com/{artist_link}/tracks")
           track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
           if track.text != rows[1]:
-              title = f"New track by {rows[0]}"
-              message = track.text
+              title = track.text
+              message = f"New track by {rows[0]}"
               command = f'''
               osascript -e 'display notification "{message}" with title "{title}"'
               '''
@@ -176,6 +193,13 @@ def check():
 #         writer.writerow(row)
 
 
+
+# schedule.every(10).minutes.do(job)
+# schedule.every().hour.do(job)
+# schedule.every().day.at("10:30").do(job)
+# schedule.every(5).to(10).minutes.do(job)
+# schedule.every().monday.do(job)
+# schedule.every().wednesday.at("13:15").do(job)
 
 schedule.every().minute.at(":15").do(check)
 
