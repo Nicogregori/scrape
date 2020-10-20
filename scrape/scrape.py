@@ -123,29 +123,55 @@ elif add.lower() == "yes":
 elif add.lower() == "ja":
   scraper()
 
-
 def check():
-    dataframe = pd.read_csv("scrape/data/Scrape.csv",header=None)
+    conn = psycopg2.connect(database="Scrape", user = "postgres", password="lennynico2011",host="localhost",port="5432")
+    dataframe = pd.read_sql_query("SELECT * FROM scrapes;", conn)
     driver = webdriver.Safari()
     driver.maximize_window()
     driver.implicitly_wait(10)
     for index,rows in dataframe.iterrows():
-          artist_link = rows[0].replace(" ","-")
+          artist_link = rows[1].replace(" ","-")
           driver.get(f"https://soundcloud.com/{artist_link}/tracks")
           track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
-          if track.text != rows[1]:
+          if track.text != rows[2]:
               title = track.text
-              message = f"New track by {rows[0]}"
+              message = f"New track by {rows[1]}"
               command = f'''
               osascript -e 'display notification "{message}" with title "{title}"'
               '''
               os.system(command)
               #print(f"{rows[0]} just uploaded {track.text}")
-              dataframe.replace(to_replace =rows[1],
-                 value = track.text,
-                  inplace = True)
-          dataframe.to_csv('scrape/data/Scrape.csv', header=None, index = False)
+              dataframe.replace(to_replace =rows[2],value = title,inplace = True)
+    query = """
+    INSERT INTO scrapes VALUES (%s, %s, %s, %s, %s)", ('soundcloud',i,track_name,'change_of_value',user_username))
+    """
+    single_insert(conn, query)
+    conn.close()
     driver.close()
+
+
+# def check():
+#     dataframe = pd.read_csv("scrape/data/Scrape.csv",header=None)
+#     driver = webdriver.Safari()
+#     driver.maximize_window()
+#     driver.implicitly_wait(10)
+#     for index,rows in dataframe.iterrows():
+#           artist_link = rows[0].replace(" ","-")
+#           driver.get(f"https://soundcloud.com/{artist_link}/tracks")
+#           track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
+#           if track.text != rows[1]:
+#               title = track.text
+#               message = f"New track by {rows[0]}"
+#               command = f'''
+#               osascript -e 'display notification "{message}" with title "{title}"'
+#               '''
+#               os.system(command)
+#               #print(f"{rows[0]} just uploaded {track.text}")
+#               dataframe.replace(to_replace =rows[1],
+#                  value = track.text,
+#                   inplace = True)
+#           dataframe.to_csv('scrape/data/Scrape.csv', header=None, index = False)
+#     driver.close()
 
     # with open('scrape/data/Scrape.csv', 'r') as read_obj, open('scrape/data/Scrape.csv', 'w') as outfile:
     #     csv_reader = reader(read_obj,delimiter=',')
