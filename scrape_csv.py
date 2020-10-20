@@ -27,7 +27,6 @@ elif create.lower() == "ja":
   profile = True
 else:
   profile = False
-  user_username = input("Type username: ")
 
 while profile == True:
   user_name = input("Type name: ")
@@ -38,7 +37,7 @@ while profile == True:
 
   conn = psycopg2.connect(database="Scrape", user = "postgres", password="lennynico2011",host="localhost",port="5432")
   cur = conn.cursor()
-  cur.execute("INSERT INTO profile VALUES (%s, %s, %s, %s, %s)", (user_name,user_surname,user_mail,user_password,user_username))
+  cur.execute("INSERT INTO profile VALUES (%s, %s, %s, %s, %s)", (user_name,user_surname,user_username,user_mail,user_password))
   cur.execute("SELECT * FROM profile;")
   print(cur.fetchall())
   conn.commit()
@@ -96,25 +95,37 @@ def scraper():
     driver.maximize_window()
     driver.implicitly_wait(10)
 
+    artists = []
+
     for i in artist_names:
+        artist_prov = []
+        artist_prov.append(i)
         artist_link = i.replace(" ","-")
         driver.get(f"https://soundcloud.com/{artist_link}/tracks")
         track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
+        artist_prov.append(track.text)
+        artists.append(artist_prov)
         print(f"{i}'s most recent track is: {track.text} \nFind the link attached:")
-        track_name = track.text
         link = get_link(artist_link)
         print(link)
-
-        conn = psycopg2.connect(database="Scrape", user = "postgres", password="lennynico2011",host="localhost",port="5432")
-        cur = conn.cursor()
-        cur.execute("INSERT INTO scrapes VALUES (%s, %s, %s, %s, %s)", ('soundcloud',i,track_name,'change_of_value',user_username))
-        cur.execute("SELECT * FROM scrapes;")
-        print(cur.fetchall())
-        conn.commit()
-        cur.close()
-        conn.close()
     driver.close()
-
+    myFile = open('scrape/data/Scrape.csv', 'a')
+    with myFile:
+      writer = csv.writer(myFile)
+      writer.writerows(artists)
+    # with open('scrape/data/Artists.csv', 'r') as read_obj:
+    #     csv_reader = reader(read_obj,delimiter=',')
+    #     for row in csv_reader:
+    #       print(row)
+          # using selenium to scrape any artists newest track
+          # artist_link = row[0].replace(" ","-")
+          # driver.get(f"https://soundcloud.com/{artist_link}/tracks")
+          # track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
+          # with open('scrape/data/Track_name.csv', 'a') as csvoutput:
+          #     writer = csv.writer(csvoutput)
+          #     for links in csv.reader(read_obj):
+          #         if links[0] != row:
+          #           row[1]=writer.writerow(track.text)
 
 if add.lower() == "y":
   scraper()
