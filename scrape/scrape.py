@@ -125,7 +125,12 @@ elif add.lower() == "ja":
 
 def check():
     conn = psycopg2.connect(database="Scrape", user = "postgres", password="lennynico2011",host="localhost",port="5432")
+    cur = conn.cursor()
     dataframe = pd.read_sql_query("SELECT * FROM scrapes;", conn)
+    cur.execute("DELETE FROM scrapes;")
+    cur.execute("SELECT * FROM scrapes;")
+    conn.commit()
+    print(cur.fetchall())
     driver = webdriver.Safari()
     driver.maximize_window()
     driver.implicitly_wait(10)
@@ -133,19 +138,18 @@ def check():
           artist_link = rows[1].replace(" ","-")
           driver.get(f"https://soundcloud.com/{artist_link}/tracks")
           track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
+          title = track.text
+          cur.execute("INSERT INTO scrapes VALUES (%s, %s, %s, %s, %s)", ('soundcloud',rows[1],title,'change_of_value',user_username))
+          conn.commit()
           if track.text != rows[2]:
-              title = track.text
               message = f"New track by {rows[1]}"
               command = f'''
               osascript -e 'display notification "{message}" with title "{title}"'
               '''
               os.system(command)
               #print(f"{rows[0]} just uploaded {track.text}")
-              dataframe.replace(to_replace =rows[2],value = title,inplace = True)
-    query = """
-    INSERT INTO scrapes VALUES (%s, %s, %s, %s, %s)", ('soundcloud',i,track_name,'change_of_value',user_username))
-    """
-    single_insert(conn, query)
+              # dataframe.replace(to_replace =rows[2],value = title,inplace = True)
+    cur.close()
     conn.close()
     driver.close()
 
@@ -216,7 +220,7 @@ def check():
 # schedule.every().monday.do(job)
 # schedule.every().wednesday.at("13:15").do(job)
 
-schedule.every().minute.at(":15").do(check)
+schedule.every().minute.at(":00").do(check)
 
 while True:
     schedule.run_pending()
