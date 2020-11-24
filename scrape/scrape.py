@@ -1,15 +1,10 @@
-from selenium import webdriver
 import pandas as pd
-from selenium.webdriver.common.keys import Keys
 import time
 import requests
 from bs4 import BeautifulSoup
 import urllib.request
 from pyvirtualdisplay import Display
-from selenium.webdriver.common.keys import Keys
 import schedule
-import time
-import pandas as pd
 import numpy as np
 import csv
 from csv import reader
@@ -17,16 +12,6 @@ import os
 import psycopg2
 from firebase import firebase
 import json
-import requests
-import scrapy
-from selenium.webdriver.chrome.options import Options
-
-#reminder
-# dict_v = {"test":3,"testtest":4}
-# for k, v in dict_v.items():
-#     if k == "test":
-#       v = 5
-#     print(v)
 
 
 firebase = firebase.FirebaseApplication('https://scrape-6f8b8.firebaseio.com/', None)

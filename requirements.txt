@@ -11,3 +11,10 @@ python-gitlab
 twine
 bs4
 beautifulsoup4
+firebase-admin==1.0.0
+Firebase
+firebase
+python-firebase
+requests
+schedule
+python-time
