@@ -156,8 +156,8 @@ def check():
 # schedule.every().monday.do(job)
 # schedule.every().wednesday.at("13:15").do(job)
 
-schedule.every().minute.at(":00").do(check)
+# schedule.every().minute.at(":00").do(check)
 
-while True:
-    schedule.run_pending()
-    time.sleep(1)
+# while True:
+#     schedule.run_pending()
+#     time.sleep(1)

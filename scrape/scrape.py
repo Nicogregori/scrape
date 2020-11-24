@@ -19,6 +19,7 @@ from firebase import firebase
 import json
 import requests
 import scrapy
+from selenium.webdriver.chrome.options import Options
 
 #reminder
 # dict_v = {"test":3,"testtest":4}
@@ -30,9 +31,6 @@ import scrapy
 
 firebase = firebase.FirebaseApplication('https://scrape-6f8b8.firebaseio.com/', None)
 result = firebase.get('', '')
-
-# result.key = user, .value = website
-# result.value.website = artistnames
 
 def get_link(link_name):
     source = urllib.request.urlopen(f"https://soundcloud.com/{link_name}/tracks").read()
@@ -46,9 +44,6 @@ def get_link(link_name):
         links.append(track_links)
     link = links[0]
     return f"https://soundcloud.com{link}"
-
-
-
 
 def scraperZZZ(artists):
     driver = webdriver.Safari()
@@ -71,51 +66,14 @@ def scraperZZZ(artists):
 
 
 def scraper(artists):
-      for i in artists:
-        artist_link = i.replace(" ","-")
-        response = requests.get(f"https://soundcloud.com/{artist_link}/tracks")
-        soup = BeautifulSoup(response.content, "html.parser")
-
-        k = soup.find_all('div', id="app")
-        #print(k)
-        #trackk = []
-        p = k.find_all("a", class_="soundTitle__title sc-link-dark")
-        print(p)
-        for tracks in p:
-            #track = tracks.find('div', class_='soundTitle__title sc-link-dark')
-            #track = movie.find("h3").find("a").string
-            #track = tracks.find("a", class_="soundTitle__title sc-link-dark")
-            print(tracks)
-
-
-class SoundSpider(scrapy.Spider):
-  name = "sound"
-
-  divs = response.xpath('//')
-
-class Article(scrapy.items)
-  headline = scrapy.Field()
-
-    # for i in artists:
-    #     artist_link = i.replace(" ","-")
-    #     driver.get(f"https://soundcloud.com/{artist_link}/tracks")
-    #     track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
-    #     print(f"{i}'s most recent track is: {track.text} \nFind the link attached:")
-    #     track_name = track.text
-    #     link = get_link(artist_link)
-    #     print(link)
-
-    #     firebase.put(f'/{user}/{sites}/',f'{i}',f'{track_name}')
-    #     print('Record Updated')
-
-
-        # movies = []
-        # for movie in soup.find_all("div", class_="lister-item-content"):
-        #     title = movie.find("h3").find("a").string
-        #     duration = int(movie.find("span", class_="runtime").string.strip(' min'))
-        #     movies.append({'title': title, 'duration': duration})
-
-        #   print(movies[0:2])
+    for i in artists:
+      artist_link = i.replace(" ","-")
+      source = urllib.request.urlopen(f"https://soundcloud.com/{artist_link}/tracks").read()
+      soup = BeautifulSoup(source, 'html.parser')
+      results = soup.find_all("a", class_="", itemprop="url")
+      track_name = results[1].text
+      firebase.put(f'/{user}/{sites}/',f'{i}',f'{track_name}')
+      print('Record Updated')
 
 
 def check():
