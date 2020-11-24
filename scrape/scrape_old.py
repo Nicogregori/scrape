@@ -15,24 +15,64 @@ import csv
 from csv import reader
 import os
 import psycopg2
-from firebase import firebase
-import json
-import requests
-import scrapy
 
-#reminder
-# dict_v = {"test":3,"testtest":4}
-# for k, v in dict_v.items():
-#     if k == "test":
-#       v = 5
-#     print(v)
+profile = True
 
+create = input("Want to create a profile (y/n)?: ")
+if create.lower() == "y":
+  profile = True
+elif create.lower() == "yes":
+  profile = True
+elif create.lower() == "ja":
+  profile = True
+else:
+  profile = False
+  user_username = input("Type username: ")
 
-firebase = firebase.FirebaseApplication('https://scrape-6f8b8.firebaseio.com/', None)
-result = firebase.get('', '')
+while profile == True:
+  user_name = input("Type name: ")
+  user_surname = input("Type surname: ")
+  user_username = input("Type username: ")
+  user_mail = input("Type e-mail: ")
+  user_password = input("Type password: ")
 
-# result.key = user, .value = website
-# result.value.website = artistnames
+  conn = psycopg2.connect(database="Scrape", user = "postgres", password="lennynico2011",host="localhost",port="5432")
+  cur = conn.cursor()
+  cur.execute("INSERT INTO profile VALUES (%s, %s, %s, %s, %s)", (user_name,user_surname,user_mail,user_password,user_username))
+  cur.execute("SELECT * FROM profile;")
+  print(cur.fetchall())
+  conn.commit()
+  cur.close()
+  conn.close()
+  profile = False
+
+artist_names = []
+
+flag = True
+
+add = input("Want to add an artist (y/n)?: ")
+if add.lower() == "y":
+  flag = True
+elif add.lower() == "yes":
+  flag = True
+elif add.lower() == "ja":
+  flag = True
+else:
+  flag = False
+
+while flag == True:
+    artist_name = input("Enter artist name: ")
+    artist_names.append(artist_name)
+    another = input("Want to look for another artist (y/n)?: ")
+    if another.lower() == "y":
+      flag = True
+    elif another.lower() == "yes":
+      flag = True
+    elif another.lower() == "ja":
+      flag = True
+    else:
+      flag = False
+
 
 def get_link(link_name):
     source = urllib.request.urlopen(f"https://soundcloud.com/{link_name}/tracks").read()
@@ -48,14 +88,12 @@ def get_link(link_name):
     return f"https://soundcloud.com{link}"
 
 
-
-
-def scraperZZZ(artists):
+def scraper():
     driver = webdriver.Safari()
     driver.maximize_window()
-    driver.implicitly_wait(100)
+    driver.implicitly_wait(10)
 
-    for i in artists:
+    for i in artist_names:
         artist_link = i.replace(" ","-")
         driver.get(f"https://soundcloud.com/{artist_link}/tracks")
         track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
@@ -64,59 +102,23 @@ def scraperZZZ(artists):
         link = get_link(artist_link)
         print(link)
 
-        firebase.put(f'/{user}/{sites}/',f'{i}',f'{track_name}')
-        print('Record Updated')
-
+        conn = psycopg2.connect(database="Scrape", user = "postgres", password="lennynico2011",host="localhost",port="5432")
+        cur = conn.cursor()
+        cur.execute("INSERT INTO scrapes VALUES (%s, %s, %s, %s, %s)", ('soundcloud',i,track_name,'change_of_value',user_username))
+        cur.execute("SELECT * FROM scrapes;")
+        print(cur.fetchall())
+        conn.commit()
+        cur.close()
+        conn.close()
     driver.close()
 
 
-def scraper(artists):
-      for i in artists:
-        artist_link = i.replace(" ","-")
-        response = requests.get(f"https://soundcloud.com/{artist_link}/tracks")
-        soup = BeautifulSoup(response.content, "html.parser")
-
-        k = soup.find_all('div', id="app")
-        #print(k)
-        #trackk = []
-        p = k.find_all("a", class_="soundTitle__title sc-link-dark")
-        print(p)
-        for tracks in p:
-            #track = tracks.find('div', class_='soundTitle__title sc-link-dark')
-            #track = movie.find("h3").find("a").string
-            #track = tracks.find("a", class_="soundTitle__title sc-link-dark")
-            print(tracks)
-
-
-class SoundSpider(scrapy.Spider):
-  name = "sound"
-
-  divs = response.xpath('//')
-
-class Article(scrapy.items)
-  headline = scrapy.Field()
-
-    # for i in artists:
-    #     artist_link = i.replace(" ","-")
-    #     driver.get(f"https://soundcloud.com/{artist_link}/tracks")
-    #     track = driver.find_element_by_css_selector("#content > div > div.l-fluid-fixed > div.l-main.l-user-main.sc-border-light-right > div > div.userMain__content > div > ul > li:nth-child(1) > div > div > div.sound__content > div.sound__header > div > div > div.soundTitle__usernameTitleContainer > a > span")
-    #     print(f"{i}'s most recent track is: {track.text} \nFind the link attached:")
-    #     track_name = track.text
-    #     link = get_link(artist_link)
-    #     print(link)
-
-    #     firebase.put(f'/{user}/{sites}/',f'{i}',f'{track_name}')
-    #     print('Record Updated')
-
-
-        # movies = []
-        # for movie in soup.find_all("div", class_="lister-item-content"):
-        #     title = movie.find("h3").find("a").string
-        #     duration = int(movie.find("span", class_="runtime").string.strip(' min'))
-        #     movies.append({'title': title, 'duration': duration})
-
-        #   print(movies[0:2])
-
+if add.lower() == "y":
+  scraper()
+elif add.lower() == "yes":
+  scraper()
+elif add.lower() == "ja":
+  scraper()
 
 def check():
     conn = psycopg2.connect(database="Scrape", user = "postgres", password="lennynico2011",host="localhost",port="5432")
@@ -147,14 +149,6 @@ def check():
     driver.close()
 
 
-for user, values in result.items():
-    artists = []
-    for sites, values_2 in values.items():
-        for artist, track in values_2.items():
-            artists.append(artist)
-        scraper(artists)
-
-
 # schedule.every(10).minutes.do(job)
 # schedule.every().hour.do(job)
 # schedule.every().day.at("10:30").do(job)
@@ -162,8 +156,8 @@ for user, values in result.items():
 # schedule.every().monday.do(job)
 # schedule.every().wednesday.at("13:15").do(job)
 
-# schedule.every().minute.at(":00").do(check)
+schedule.every().minute.at(":00").do(check)
 
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
+while True:
+    schedule.run_pending()
+    time.sleep(1)
